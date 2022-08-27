@@ -132,6 +132,7 @@ func runServer(c *cli.Context) {
 			opts.SetPassword(c.String("pass"))
 		}
 	}
+
 	// if you have a client certificate you want a key aswell
 	if c.String("cert") != "" && c.String("key") != "" {
 		keyPair, err := tls.LoadX509KeyPair(c.String("cert"), c.String("key"))
@@ -188,8 +189,7 @@ func runServer(c *cli.Context) {
 	// init the router and server
 	http.Handle("/metrics", promhttp.Handler())
 	log.Printf("Listening on %s...", c.GlobalString("bind-address"))
-	err := http.ListenAndServe(c.GlobalString("bind-address"), nil)
-	fatalfOnError(err, "Failed to bind on %s: ", c.GlobalString("bind-address"))
+	log.Fatal(http.ListenAndServe(c.GlobalString("bind-address"), nil))
 }
 
 // $SYS/broker/bytes/received
@@ -268,10 +268,4 @@ func parseValue(payload string) float64 {
 		}
 	}
 	return 0
-}
-
-func fatalfOnError(err error, msg string, args ...interface{}) {
-	if err != nil {
-		log.Fatalf(msg, args...)
-	}
 }
