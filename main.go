@@ -63,6 +63,10 @@ func main() {
 			Name:  "Fabian Ruff",
 			Email: "fabian.ruff@sap.com",
 		},
+		{
+			Name:  "Steffen Uhlig",
+			Email: "steffen@familie-uhlig.net",
+		},
 	}
 	app.Usage = "Prometheus exporter for Mosquitto broker metrics"
 	app.Action = runServer
