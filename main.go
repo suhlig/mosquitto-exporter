@@ -156,7 +156,6 @@ func runServer(c *cli.Context) {
 
 	opts.OnConnect = func(client mqtt.Client) {
 		log.Printf("Connected to %s", c.String("endpoint"))
-		// subscribe on every (re)connect
 		token := client.Subscribe("$SYS/#", 0, func(_ mqtt.Client, msg mqtt.Message) {
 			processUpdate(msg.Topic(), string(msg.Payload()))
 		})
@@ -172,7 +171,6 @@ func runServer(c *cli.Context) {
 	}
 	client := mqtt.NewClient(opts)
 
-	// try to connect forever
 	for {
 		token := client.Connect()
 		if token.WaitTimeout(5 * time.Second) {
@@ -186,7 +184,6 @@ func runServer(c *cli.Context) {
 		time.Sleep(5 * time.Second)
 	}
 
-	// init the router and server
 	http.Handle("/metrics", promhttp.Handler())
 	log.Printf("Listening on %s...", c.GlobalString("bind-address"))
 	log.Fatal(http.ListenAndServe(c.GlobalString("bind-address"), nil))
@@ -194,13 +191,10 @@ func runServer(c *cli.Context) {
 
 // $SYS/broker/bytes/received
 func processUpdate(topic, payload string) {
-	//log.Printf("Got broker update with topic %s and data %s", topic, payload)
 	if _, ok := ignoreKeyMetrics[topic]; !ok {
 		if _, ok := counterKeyMetrics[topic]; ok {
-			// log.Printf("Processing counter metric %s with data %s", topic, payload)
 			processCounterMetric(topic, payload)
 		} else {
-			//log.Printf("Processing gauge metric %s with data %s", topic, payload)
 			processGaugeMetric(topic, payload)
 		}
 	}
@@ -211,7 +205,6 @@ func processCounterMetric(topic, payload string) {
 		value := parseValue(payload)
 		counterMetrics[topic].Set(value)
 	} else {
-		// create a mosquitto counter pointer
 		mCounter := NewMosquittoCounter(prometheus.NewDesc(
 			parseTopic(topic),
 			topic,
@@ -219,11 +212,8 @@ func processCounterMetric(topic, payload string) {
 			prometheus.Labels{},
 		))
 
-		// save it
 		counterMetrics[topic] = mCounter
-		// register the metric
 		prometheus.MustRegister(mCounter)
-		// add the first value
 		value := parseValue(payload)
 		counterMetrics[topic].Set(value)
 	}
@@ -238,9 +228,7 @@ func processGaugeMetric(topic, payload string) {
 			Name: parseTopic(topic),
 			Help: topic,
 		})
-		// register the metric
 		prometheus.MustRegister(gaugeMetrics[topic])
-		// add the first value
 		value := parseValue(payload)
 		gaugeMetrics[topic].Set(value)
 	}
@@ -256,12 +244,9 @@ func parseTopic(topic string) string {
 }
 
 func parseValue(payload string) float64 {
-	// fmt.Printf("Payload %s \n", payload)
 	var validValue = regexp.MustCompile(`-?\d{1,}[.]\d{1,}|\d{1,}`)
-	// get the first value of the string
 	strArray := validValue.FindAllString(payload, 1)
 	if len(strArray) > 0 {
-		// parse to float
 		value, err := strconv.ParseFloat(strArray[0], 64)
 		if err == nil {
 			return value
