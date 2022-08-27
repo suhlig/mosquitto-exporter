@@ -64,7 +64,7 @@ func main() {
 			Email: "fabian.ruff@sap.com",
 		},
 	}
-	app.Usage = "Prometheus exporter for broker metrics"
+	app.Usage = "Prometheus exporter for Mosquitto broker metrics"
 	app.Action = runServer
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -122,7 +122,7 @@ func runServer(c *cli.Context) {
 	opts.AddBroker(c.String("endpoint"))
 
 	if c.String("client-id") != "" {
-		opts.SetClientID(c.String("client-id"))
+		opts.SetClientID(c.String("mosquitto-prometheus-exporter"))
 	}
 
 	// if you have a username you'll need a password with it
