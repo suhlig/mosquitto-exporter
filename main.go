@@ -49,7 +49,6 @@ var (
 func main() {
 	app := cli.NewApp()
 
-	// mqtt.DEBUG = log.New(os.Stdout, "", 0)
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
 	mqtt.WARN = log.New(os.Stdout, "", 0)
 
@@ -188,7 +187,6 @@ func runServer(c *cli.Context) {
 
 	// init the router and server
 	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/", serveVersion)
 	log.Printf("Listening on %s...", c.GlobalString("bind-address"))
 	err := http.ListenAndServe(c.GlobalString("bind-address"), nil)
 	fatalfOnError(err, "Failed to bind on %s: ", c.GlobalString("bind-address"))
