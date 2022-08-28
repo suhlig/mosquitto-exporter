@@ -42,3 +42,7 @@ changelog:
 release:
   # Mark the release as not ready for production if there is an indicator for this in the tag e.g. v1.0.0-rc1
   prerelease: auto
+
+publishers:
+  - name: save-release-url
+    cmd: sh -c "echo '{{ .ReleaseURL }}' > dist/release-url.txt"
